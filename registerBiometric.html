@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="icon" type="image/png" href="faviconbg.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trevor 6 Wallet - Biometric System</title>
+    <style>
+        /* ===== BASE STYLES ===== */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --text: #34495e;
+            --text-light: #7f8c8d;
+            --transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== LOGO & HEADER ===== */
+        .logo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.8s;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        .app-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* ===== REGISTRATION FORM ===== */
+        .registration-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            animation: slideUp 0.6s;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .username-display {
+            background: var(--light);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border-left: 4px solid var(--secondary);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-link {
+            background: none;
+            color: var(--secondary);
+            text-decoration: underline;
+            padding: 0;
+            width: auto;
+        }
+
+        /* ===== BIOMETRIC CAPTURE SCREEN ===== */
+        .biometric-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s;
+        }
+
+        .biometric-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .scanner-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .finger-circle {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 3px dashed var(--secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .finger-circle.active {
+            border-color: var(--success);
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: var(--success);
+            top: 0;
+            left: 0;
+            opacity: 0;
+            z-index: 2;
+        }
+
+        .scanning .scan-line {
+            opacity: 0.8;
+            animation: scan 1.5s linear infinite;
+        }
+
+        .circle-guideline {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .finger-circle p {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 320px;
+            margin: 2rem auto;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .countdown {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 0.5rem;
+        }
+
+        .finger-instruction {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* ===== SUCCESS STATES ===== */
+        .success-message {
+            text-align: center;
+            animation: fadeIn 0.6s;
+        }
+
+        .success-message .icon {
+            font-size: 4rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+            animation: bounceIn 0.6s;
+        }
+
+        .success-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--success);
+        }
+
+        /* ===== FACIAL VERIFICATION FAILURE ===== */
+        .failure-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(231, 76, 60, 0.9);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+
+        .failure-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .failure-logo {
+            width: 80px;
+            margin-bottom: 1.5rem;
+            animation: fadeInDown 0.6s;
+        }
+
+        .failure-message {
+            margin-bottom: 1.5rem;
+        }
+
+        .failure-message h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .monospace-text {
+            font-family: monospace;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        /* ===== NOTIFICATIONS ===== */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.4s;
+        }
+
+        .notification.active {
+            opacity: 1;
+            top: 30px;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* ===== RESPONSIVE ADJUSTMENTS ===== */
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .scanner-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .finger-circle {
+                width: 120px;
+                height: 120px;
+            }
+			.footer span {
+				size: 0.19px;
+			}
+			}
+        }
+			
+    </style>
+</head>
+<body>
+    <!-- Main Registration Screen -->
+    <div class="container" id="registrationScreen">
+        <div class="logo-header">
+            <img src="logo.png" alt="Genesis Logo" class="logo">
+            <h1 class="app-title">Trevor 6 Wallet</h1>
+            <p class="app-subtitle">Secure Biometric Authentication System</p>
+        </div>
+        
+        <div class="registration-form">
+            <div class="username-display">VMNRD•MONI•BULLEŒ•Œ</div>
+            
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" class="form-control" placeholder="eg., Investor John Doe">
+            </div>
+            
+            <button class="btn btn-primary" id="registerBtn">Proceed to Biometric Registration →</button>
+        </div>
+        
+        <p style="text-align: center; color: var(--text-light);">
+            Already have an account? <a href="#" class="btn-link" id="loginLink">Login here</a>
+        </p>
+        
+        <footer style="margin-top: auto; text-align: center; color: var(--primary); font-size: 0.8rem;">
+            Genesis Mining | •Trevor 6 Machine Wallet• <br> | Secure Biometric Authentication System <span style="color: #FFAB32;"><strong>© </Strong></span>|
+        </footer>
+    </div>
+    
+    <!-- Biometric Capture Screen -->
+    <div class="biometric-screen" id="biometricScreen">
+        <h2 style="color: var(--primary);">Biometric Capture</h2>
+        <p class="finger-instruction" id="fingerInstruction">Place both thumbs simultaneously in the circles</p>
+        
+        <div class="scanner-container">
+            <div class="finger-circle" id="rightThumb">
+                <div class="scan-line"></div>
+                <div class="circle-guideline"></div>
+                <p>Right Thumb</p>
+            </div>
+            <div class="finger-circle" id="leftThumb">
+                <div class="scan-line"></div>
+                <div class="circle-guideline"></div>
+                <p>Left Thumb</p>
+            </div>
+        </div>
+        
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="countdown" id="countdown">7.8s</div>
+        </div>
+    </div>
+    
+    <!-- Pinky Nail Verification Screen -->
+    <div class="biometric-screen" id="pinkyScreen">
+        <h2 style="color: var(--primary);">Fifth Finger Verification</h2>
+        <p class="finger-instruction">Place both pinky nails simultaneously in the circles</p>
+        
+        <div class="scanner-container">
+            <div class="finger-circle" id="rightPinky">
+                <div class="scan-line"></div>
+                <div class="circle-guideline"></div>
+                <p>Right Pinky</p>
+            </div>
+            <div class="finger-circle" id="leftPinky">
+                <div class="scan-line"></div>
+                <div class="circle-guideline"></div>
+                <p>Left Pinky</p>
+            </div>
+        </div>
+        
+        <div class="progress-container" id="pinkyProgressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="pinkyProgressFill"></div>
+            </div>
+            <div class="countdown" id="pinkyCountdown">7.8s</div>
+        </div>
+    </div>
+    
+    <!-- Facial Verification Failure Screen -->
+    <div class="failure-overlay" id="failureOverlay">
+        <img src="https://via.placeholder.com/80x40?text=Genesis" alt="Genesis Logo" class="failure-logo">
+        <div class="failure-message">
+            <h2>FACIAL VERIFICATION PROCESSES FAILED</h2>
+            <p class="monospace-text">cOnTaCt FaCiAl VeRiFicAtIoN dEpArTmEnT</p>
+        </div>
+        <p style="margin-bottom: 1.5rem;">
+            • You are only required to pay the SuM of $250 (USD)..<br>
+            report if you're told to pay more than $250
+        </p>
+    </div>
+    
+    <!-- Notification System -->
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        // DOM Elements
+        const registrationScreen = document.getElementById('registrationScreen');
+        const biometricScreen = document.getElementById('biometricScreen');
+        const pinkyScreen = document.getElementById('pinkyScreen');
+        const failureOverlay = document.getElementById('failureOverlay');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginLink = document.getElementById('loginLink');
+        const progressFill = document.getElementById('progressFill');
+        const countdown = document.getElementById('countdown');
+        const pinkyProgressFill = document.getElementById('pinkyProgressFill');
+        const pinkyCountdown = document.getElementById('pinkyCountdown');
+        const notification = document.getElementById('notification');
+        const fingerInstruction = document.getElementById('fingerInstruction');
+        const progressContainer = document.getElementById('progressContainer');
+        const pinkyProgressContainer = document.getElementById('pinkyProgressContainer');
+        
+        // Finger detection state
+        let rightThumbDetected = false;
+        let leftThumbDetected = false;
+        let rightPinkyDetected = false;
+        let leftPinkyDetected = false;
+        let progressInterval;
+        let pinkyProgressInterval;
+        let isLoginFlow = false;
+        let fullName = '';
+        let fingersHeld = false;
+        let scanTimeout;
+        
+        // Biometric Registration Flow
+        registerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fullName = document.getElementById('fullName').value;
+            
+            if (!fullName) {
+                showNotification('Please enter your full name', false);
+                return;
+            }
+            
+            isLoginFlow = false;
+            startBiometricProcess();
+        });
+        
+        // Login Flow
+        loginLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            fullName = "Registered User"; // Default for login
+            isLoginFlow = true;
+            showNotification('Biometric verification required for login', true);
+            
+            setTimeout(() => {
+                startBiometricProcess();
+            }, 1500);
+        });
+        
+        function startBiometricProcess() {
+            // Reset states
+            resetBiometricStates();
+            
+            // Show biometric screen
+            biometricScreen.classList.add('active');
+            fingerInstruction.textContent = 'Press and hold both thumbs simultaneously in the circles';
+            
+            // Setup finger detection
+            setupFingerDetection();
+        }
+        
+        function setupFingerDetection() {
+            const rightThumbCircle = document.getElementById('rightThumb');
+            const leftThumbCircle = document.getElementById('leftThumb');
+            
+            // Mouse/touch events for simulation
+            rightThumbCircle.addEventListener('mousedown', () => handleFingerDown('right'));
+            leftThumbCircle.addEventListener('mousedown', () => handleFingerDown('left'));
+            
+            rightThumbCircle.addEventListener('mouseup', () => handleFingerUp('right'));
+            leftThumbCircle.addEventListener('mouseup', () => handleFingerUp('left'));
+            
+            rightThumbCircle.addEventListener('mouseleave', () => handleFingerUp('right'));
+            leftThumbCircle.addEventListener('mouseleave', () => handleFingerUp('left'));
+            
+            // Touch events for mobile
+            rightThumbCircle.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleFingerDown('right');
+            });
+            leftThumbCircle.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleFingerDown('left');
+            });
+            
+            rightThumbCircle.addEventListener('touchend', () => handleFingerUp('right'));
+            leftThumbCircle.addEventListener('touchend', () => handleFingerUp('left'));
+        }
+        
+        function handleFingerDown(finger) {
+            if (finger === 'right') {
+                rightThumbDetected = true;
+                document.getElementById('rightThumb').classList.add('active');
+            } else {
+                leftThumbDetected = true;
+                document.getElementById('leftThumb').classList.add('active');
+            }
+            
+            checkFingerStatus();
+        }
+        
+        function handleFingerUp(finger) {
+            if (finger === 'right') {
+                rightThumbDetected = false;
+                document.getElementById('rightThumb').classList.remove('active');
+            } else {
+                leftThumbDetected = false;
+                document.getElementById('leftThumb').classList.remove('active');
+            }
+            
+            if (fingersHeld) {
+                stopScanning();
+            }
+        }
+        
+        function checkFingerStatus() {
+            if (rightThumbDetected && leftThumbDetected && !fingersHeld) {
+                fingersHeld = true;
+                startScanning();
+            }
+        }
+        
+        function startScanning() {
+            fingerInstruction.textContent = 'Keep holding both thumbs... Scanning in progress';
+            progressContainer.style.display = 'block';
+            
+            // Add scanning animation
+            document.querySelectorAll('.finger-circle').forEach(circle => {
+                circle.classList.add('scanning');
+            });
+            
+            // Start progress timer after short delay
+            scanTimeout = setTimeout(() => {
+                startProgressTimer();
+            }, 500);
+        }
+        
+        function stopScanning() {
+            fingersHeld = false;
+            clearTimeout(scanTimeout);
+            stopProgressTimer();
+            
+            // Remove scanning animation
+            document.querySelectorAll('.finger-circle').forEach(circle => {
+                circle.classList.remove('scanning');
+            });
+            
+            fingerInstruction.textContent = 'Press and hold both thumbs simultaneously in the circles';
+            progressContainer.style.display = 'none';
+        }
+        
+        function startProgressTimer() {
+            let timeLeft = 7.8;
+            countdown.textContent = timeLeft.toFixed(1) + 's';
+            progressFill.style.width = '0%';
+            
+            progressInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                countdown.textContent = timeLeft.toFixed(1) + 's';
+                const progressPercent = 100 - (timeLeft/7.8 * 100);
+                progressFill.style.width = `${progressPercent}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(progressInterval);
+                    completeThumbCapture();
+                }
+            }, 100);
+        }
+        
+        function stopProgressTimer() {
+            clearInterval(progressInterval);
+            countdown.textContent = '7.8s';
+            progressFill.style.width = '0%';
+        }
+        
+        function completeThumbCapture() {
+            // Show success state
+            const scannerContainer = document.querySelector('.scanner-container');
+            scannerContainer.innerHTML = `
+                <div class="success-message">
+                    <div class="icon">✓</div>
+                    <h3>THUMB CAPTURE SUCCESSFUL</h3>
+                </div>
+            `;
+            
+            progressContainer.style.display = 'none';
+            
+            // Proceed to pinky nail verification after delay
+            setTimeout(() => {
+                biometricScreen.classList.remove('active');
+                startPinkyVerification();
+            }, 2000);
+        }
+        
+        function startPinkyVerification() {
+            resetPinkyStates();
+            pinkyScreen.classList.add('active');
+            
+            // Setup pinky detection
+            const rightPinkyCircle = document.getElementById('rightPinky');
+            const leftPinkyCircle = document.getElementById('leftPinky');
+            
+            rightPinkyCircle.addEventListener('mousedown', () => handlePinkyDown('right'));
+            leftPinkyCircle.addEventListener('mousedown', () => handlePinkyDown('left'));
+            
+            rightPinkyCircle.addEventListener('mouseup', () => handlePinkyUp('right'));
+            leftPinkyCircle.addEventListener('mouseup', () => handlePinkyUp('left'));
+            
+            rightPinkyCircle.addEventListener('mouseleave', () => handlePinkyUp('right'));
+            leftPinkyCircle.addEventListener('mouseleave', () => handlePinkyUp('left'));
+            
+            // Touch events for mobile
+            rightPinkyCircle.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handlePinkyDown('right');
+            });
+            leftPinkyCircle.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handlePinkyDown('left');
+            });
+            
+            rightPinkyCircle.addEventListener('touchend', () => handlePinkyUp('right'));
+            leftPinkyCircle.addEventListener('touchend', () => handlePinkyUp('left'));
+        }
+        
+        function handlePinkyDown(finger) {
+            if (finger === 'right') {
+                rightPinkyDetected = true;
+                document.getElementById('rightPinky').classList.add('active');
+            } else {
+                leftPinkyDetected = true;
+                document.getElementById('leftPinky').classList.add('active');
+            }
+            
+            if (rightPinkyDetected && leftPinkyDetected) {
+                startPinkyScanning();
+            }
+        }
+        
+        function handlePinkyUp(finger) {
+            if (finger === 'right') {
+                rightPinkyDetected = false;
+                document.getElementById('rightPinky').classList.remove('active');
+            } else {
+                leftPinkyDetected = false;
+                document.getElementById('leftPinky').classList.remove('active');
+            }
+            
+            stopPinkyScanning();
+        }
+        
+        function startPinkyScanning() {
+            pinkyProgressContainer.style.display = 'block';
+            
+            // Add scanning animation
+            document.querySelectorAll('#pinkyScreen .finger-circle').forEach(circle => {
+                circle.classList.add('scanning');
+            });
+            
+            startPinkyProgressTimer();
+        }
+        
+        function stopPinkyScanning() {
+            clearInterval(pinkyProgressInterval);
+            pinkyCountdown.textContent = '7.8s';
+            pinkyProgressFill.style.width = '0%';
+            
+            // Remove scanning animation
+            document.querySelectorAll('#pinkyScreen .finger-circle').forEach(circle => {
+                circle.classList.remove('scanning');
+            });
+            
+            pinkyProgressContainer.style.display = 'none';
+        }
+        
+        function startPinkyProgressTimer() {
+            let timeLeft = 7.8;
+            pinkyCountdown.textContent = timeLeft.toFixed(1) + 's';
+            pinkyProgressFill.style.width = '0%';
+            
+            pinkyProgressInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                pinkyCountdown.textContent = timeLeft.toFixed(1) + 's';
+                const progressPercent = 100 - (timeLeft/7.8 * 100);
+                pinkyProgressFill.style.width = `${progressPercent}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(pinkyProgressInterval);
+                    completePinkyVerification();
+                }
+            }, 100);
+        }
+        
+        function completePinkyVerification() {
+            // Show success state
+            const pinkyScannerContainer = pinkyScreen.querySelector('.scanner-container');
+            pinkyScannerContainer.innerHTML = `
+                <div class="success-message">
+                    <div class="icon">✓</div>
+                    <h3>PINKY VERIFICATION SUCCESSFUL</h3>
+                </div>
+            `;
+            
+            pinkyProgressContainer.style.display = 'none';
+            
+            // Show notifications sequence
+            setTimeout(() => {
+                showNotification('Biometric Pro Level Verification - SUCCESS', true);
+                
+                setTimeout(() => {
+                    showNotification(`Biometric Sent and Received... DATABASED/STORED on ${fullName}`, true);
+                    
+                    setTimeout(() => {
+                        showNotification('Biometric is now Set/Used to Unlock Your Trevor 6 Wallet System', true);
+                        
+                        // Initiate facial verification after all biometric steps
+                        setTimeout(initiateFacialVerification, 3000);
+                    }, 3000);
+                }, 3000);
+            }, 2000);
+        }
+        
+        // Facial Verification Process
+        function initiateFacialVerification() {
+            // Close all biometric screens
+            biometricScreen.classList.remove('active');
+            pinkyScreen.classList.remove('active');
+            
+            // Show "Facial Verification Starting..." with blinking effect
+            let blinkCount = 0;
+            const blinkInterval = setInterval(() => {
+                showNotification('Facial Verification Starting...', blinkCount % 2 === 0);
+                blinkCount++;
+                
+                if (blinkCount >= 6) { // 3 blinks
+                    clearInterval(blinkInterval);
+                    setTimeout(() => showFacialVerificationFailure(), 500);
+                }
+            }, 500);
+        }
+        
+        function showFacialVerificationFailure() {
+            // Show failure overlay
+            failureOverlay.classList.add('active');
+            
+            // Start blinking after 2 seconds (slower blink)
+            setTimeout(() => {
+                failureOverlay.style.animation = 'blink 1.5s 3';
+            }, 2000);
+        }
+        
+        // Reset functions
+        function resetBiometricStates() {
+            rightThumbDetected = false;
+            leftThumbDetected = false;
+            fingersHeld = false;
+            const rightThumbCircle = document.getElementById('rightThumb');
+            const leftThumbCircle = document.getElementById('leftThumb');
+            rightThumbCircle.classList.remove('active', 'scanning');
+            leftThumbCircle.classList.remove('active', 'scanning');
+            stopProgressTimer();
+            progressContainer.style.display = 'none';
+            
+            // Reset scanner container if coming back
+            const scannerContainer = document.querySelector('.scanner-container');
+            if (scannerContainer) {
+                scannerContainer.innerHTML = `
+                    <div class="finger-circle" id="rightThumb">
+                        <div class="scan-line"></div>
+                        <div class="circle-guideline"></div>
+                        <p>Right Thumb</p>
+                    </div>
+                    <div class="finger-circle" id="leftThumb">
+                        <div class="scan-line"></div>
+                        <div class="circle-guideline"></div>
+                        <p>Left Thumb</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function resetPinkyStates() {
+            rightPinkyDetected = false;
+            leftPinkyDetected = false;
+            const rightPinkyCircle = document.getElementById('rightPinky');
+            const leftPinkyCircle = document.getElementById('leftPinky');
+            rightPinkyCircle.classList.remove('active', 'scanning');
+            leftPinkyCircle.classList.remove('active', 'scanning');
+            stopPinkyScanning();
+            pinkyProgressContainer.style.display = 'none';
+            
+            // Reset scanner container if coming back
+            const pinkyScannerContainer = pinkyScreen.querySelector('.scanner-container');
+            if (pinkyScannerContainer) {
+                pinkyScannerContainer.innerHTML = `
+                    <div class="finger-circle" id="rightPinky">
+                        <div class="scan-line"></div>
+                        <div class="circle-guideline"></div>
+                        <p>Right Pinky</p>
+                    </div>
+                    <div class="finger-circle" id="leftPinky">
+                        <div class="scan-line"></div>
+                        <div class="circle-guideline"></div>
+                        <p>Left Pinky</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Notification System
+        function showNotification(message, isSuccess) {
+            notification.textContent = message;
+            notification.style.background = isSuccess ? 'var(--success)' : 'var(--danger)';
+            notification.classList.add('active');
+            
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

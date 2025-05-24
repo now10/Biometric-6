@@ -1,0 +1,44 @@
+.finger-circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px dashed #4a90e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 20px;
+}
+
+.circle-guideline {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  border: 1px solid rgba(74, 144, 226, 0.5);
+}
+
+.progress-bar {
+  width: 80%;
+  height: 6px;
+  background: #e0e0e0;
+  margin: 30px auto;
+  border-radius: 3px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #4CAF50;
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.success-message {
+  text-align: center;
+  color: #4CAF50;
+}
+
+.checkmark {
+  font-size: 60px;
+  line-height: 1;
+  margin-bottom: 20px;
+}
