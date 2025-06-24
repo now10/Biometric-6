@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Mining - BTC Investment Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #0a3d62;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .stats-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .stats-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0a3d62;
+        }
+        .stats-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .stat-item {
+            background-color: white;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .mining-status {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+        }
+        .profit-status {
+            background-color: #e8f8f0;
+            border-left: 4px solid #27ae60;
+        }
+        .hardware-status {
+            background-color: #fef9e7;
+            border-left: 4px solid #f39c12;
+        }
+        .chart-container {
+            height: 300px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .chart-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .footer {
+            background-color: #0a3d62;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            border-bottom: 3px solid #3498db;
+            font-weight: bold;
+        }
+        .coin-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <div class="logo">
+                <img src="img/logo.png" alt="Genesis Mining" height="30">
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">JM</div>
+                <span>MONICA B. (Verified)</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="tab-nav">
+                <div class="tab active">Dashboard</div>
+                <div class="tab">Mining Contracts</div>
+                <div class="tab">Withdrawals</div>
+                <div class="tab">Account Settings</div>
+            </div>
+            
+            <div class="stats-card">
+                <div class="stats-header">
+                    <div class="stats-title">
+                        <img src="img/btc.jpeg" alt="Bitcoin" class="coin-icon" height="554" width="30">
+                        Bitcoin Mining Summary
+                    </div>
+                    <div class="stats-period">Last 30 days</div>
+                </div>
+                
+                <div class="stats-value">106,734.00 EUR</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item mining-status">
+                        <div class="stat-label">Hashrate</div>
+                        <div class="stat-value">280 TH/s</div>
+                    </div>
+                    <div class="stat-item profit-status">
+                        <div class="stat-label">Daily Profit</div>
+                        <div class="stat-value">3,557.80 EUR</div>
+                    </div>
+                    <div class="stat-item hardware-status">
+                        <div class="stat-label">Active Miners</div>
+                        <div class="stat-value">15</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Mined BTC</div>
+                        <div class="stat-value">1.9425</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Contract Duration</div>
+                        <div class="stat-value">36 Months</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Maintenance Fee</div>
+                        <div class="stat-value">0.00 EUR</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    [BTC Mining Profitability Chart Would Appear Here]
+                </div>
+            </div>
+            
+            <div class="stats-card" style="margin-top: 20px;">
+                <div class="stats-header">
+                    <div class="stats-title">Recent Mining Activity</div>
+                    <div class="stats-period">View All</div>
+                </div>
+                
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <th style="text-align: left; padding: 10px 0;">Date</th>
+                            <th style="text-align: left;">Amount (BTC)</th>
+                            <th style="text-align: left;">Value (EUR)</th>
+                            <th style="text-align: left;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px 0;">2025-06-15</td>
+                            <td>0.0451</td>
+                            <td>1,523.15</td>
+                            <td><span style="color: #27ae60;">Completed</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px 0;">2025-06-14</td>
+                            <td>0.0448</td>
+                            <td>1,512.87</td>
+                            <td><span style="color: #27ae60;">Completed</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px 0;">2025-06-13</td>
+                            <td>0.0445</td>
+                            <td>1,502.35</td>
+                            <td><span style="color: #27ae60;">Completed</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px 0;">2025-06-12</td>
+                            <td>0.0442</td>
+                            <td>1,492.01</td>
+                            <td><span style="color: #27ae60;">Completed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            © 2025 Genesis Mining. All rights reserved. | <a href="#" style="color: #3498db;">Terms of Service</a> | <a href="#" style="color: #3498db;">Privacy Policy</a>
+        </div>
+    </div>
+</body>
+  </html>
