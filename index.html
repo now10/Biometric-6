@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trevor 6 Wallet - Secure Crypto Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #87CEEB;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        #container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #device-container {
+            width: 90%;
+            max-width: 400px;
+            height: 80vh;
+            max-height: 700px;
+            background: #1a1a1a;
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 10px solid #333;
+        }
+        
+        #login-container {
+            position: relative;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: all 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        #dashboard-container {
+            position: relative;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 200, 100, 0.6);
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        /* Hamburger Menu Styles */
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 20px;
+            cursor: pointer;
+            z-index: 20;
+        }
+        
+        .menu-btn span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background: #4CAF50;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Settings Panel */
+        .settings-panel {
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            height: 100%;
+            background: rgba(20, 20, 20, 0.98);
+            transition: all 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            z-index: 15;
+        }
+        
+        .settings-panel.active {
+            right: 0;
+        }
+        
+        .settings-header {
+            color: #4CAF50;
+            font-size: 22px;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .settings-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #222;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .settings-item:hover {
+            background: #2a2a2a;
+        }
+        
+        .settings-item .icon {
+            margin-right: 10px;
+            color: #4CAF50;
+        }
+        
+        .security-warning {
+            background: #331111;
+            border-left: 4px solid #f44336;
+            animation: pulse 2s infinite;
+        }
+        
+        .security-warning .icon {
+            color: #f44336;
+        }
+        
+        .access-denied {
+            display: none;
+            background: #331111;
+            color: #f44336;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+            border: 1px solid #f44336;
+            text-align: center;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        /* Rest of your existing styles... */
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #2E7D32, #4CAF50);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        
+        .error {
+            color: #f44336;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        #chart-container {
+            width: 100%;
+            height: 250px;
+            margin-top: 20px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .wallet-info {
+            background: #222;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .info-label {
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 8px 0;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 12px;
+        }
+        
+        #logout-btn {
+            background: linear-gradient(135deg, #f44336, #c62828);
+            width: auto;
+            padding: 8px 15px;
+            margin-left: auto;
+            font-size: 14px;
+        }
+        
+        #logout-btn:hover {
+            background: linear-gradient(135deg, #c62828, #f44336);
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+        }
+        
+        .account-info {
+            background: #222;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .account-name {
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .account-type {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .account-balance {
+            color: #4CAF50;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        @media (min-width: 768px) {
+            #device-container {
+                width: 80%;
+                max-width: 800px;
+                height: 85vh;
+                max-height: 800px;
+            }
+            
+            h1 {
+                font-size: 26px;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stat-value {
+                font-size: 22px;
+            }
+            
+            .stat-label {
+                font-size: 14px;
+            }
+            
+            #chart-container {
+                height: 300px;
+            }
+            
+            .info-label, .info-value {
+                font-size: 16px;
+            }
+            
+            .settings-panel {
+                width: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="device-container">
+            <!-- Hamburger Menu Button -->
+            <div class="menu-btn" id="menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <!-- Settings Panel -->
+            <div class="settings-panel" id="settings-panel">
+                <div class="settings-header">Settings & Options</div>
+                
+                <div class="settings-item security-warning" id="security-settings">
+                    <span class="icon">🚫</span> Security Settings
+                    <div class="access-denied">Security Settings not complete</div>
+                </div>
+                
+                <div class="settings-item" id="investment-portfolio">
+                    <span class="icon">💼</span> Investment Portfolio
+                    <div class="access-denied">Access denied, System Security Settings not Available</div>
+                </div>
+                
+                <div class="settings-item" id="crypto-wallet">
+                    <span class="icon">💰</span> Crypto Wallet Management
+                    <div class="access-denied">Access denied, System Security Settings not Available</div>
+                </div>
+                
+                <div class="settings-item" id="trading-options">
+                    <span class="icon">📊</span> Trading Options
+                    <div class="access-denied">Access denied, System Security Settings not Available</div>
+                </div>
+                
+                <div class="settings-item" id="withdrawal-settings">
+                    <span class="icon">🏧</span> Withdrawal Settings
+                    <div class="access-denied">Access denied, System Security Settings not Available</div>
+                </div>
+                
+                <div class="settings-item" id="api-settings">
+                    <span class="icon">🔌</span> API Integration
+                    <div class="access-denied">Access denied, System Security Settings not Available</div>
+                </div>
+                
+                <div class="settings-item" id="notifications">
+                    <span class="icon">🔔</span> Notification Settings
+                    <div class="access-denied">Access denied, System Security Settings not Available</div>
+                </div>
+                
+                <div class="settings-item" id="account-settings">
+                    <span class="icon">👤</span> Account Settings
+                    <div class="access-denied">Access denied, System Security Settings not Available</div>
+                </div>
+            </div>
+            
+            <div id="login-container">
+                <h1>Trevor <span style="color: white;">6</span> Wallet Dashboard</h1>
+                <div class="input-group">
+                    <label for="certificate">Certificate Number</label>
+                    <input type="text" id="certificate" placeholder="Enter certificate number">
+                </div>
+                <div class="input-group">
+                    <label for="withdrawalHash">Withdrawal Hash Code</label>
+                    <input type="password" id="withdrawalHash" placeholder="Enter withdrawal hash">
+                </div>
+                <button id="login-btn">Authenticate</button>
+                <div id="login-error" class="error">Invalid credentials. Please try again.</div>
+            </div>
+            
+            <div id="dashboard-container">
+                                <!-- BANK OPTIONS -->
+                    <div style="font-family: Arial, sans-serif; background-color: ##090909; padding: 20px; border-radius: 8px; width: 300px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <button onclick="alert('Account Restricted - Deactivated')" style="background-color: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Deposit</button>
+    <button onclick="alert('Account Restricted - Deactivated')" style="background-color: #f44336; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Withdraw</button>
+    <div style="position: relative;">
+      <button onclick="document.getElementById('transferOptions').style.display = document.getElementById('transferOptions').style.display === 'block' ? 'none' : 'block'" style="background-color: #2196F3; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Transfer</button>
+      <div id="transferOptions" style="display: none; position: absolute; background-color: white; min-width: 160px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1; border-radius: 4px;">
+        <a href="#" onclick="alert('Account Restricted - Unlock'); return false;" style="color: black; padding: 12px 16px; text-decoration: none; display: block;">Bank Transfer</a>
+        <a href="#" onclick="alert('Account Restricted - Unlock'); return false;" style="color: black; padding: 12px 16px; text-decoration: none; display: block;">Cryptocurrency Transfer</a>
+      </div>
+    </div>
+  </div>
+</div>
+                <div class="dashboard-header">
+
+ <!-- TREVOR 6 WALLET -->
+
+                    <h1>Trevor <span style="color: white;">6</span> Wallet Dashboard</h1>
+                    <button id="logout-btn">Logout</button>
+                </div>
+                
+                <div class="account-info">
+                    <div class="account-name">Investor Monica BULLERI</div>
+                    <div class="account-type">VIP Agent</div>
+                    <div class="account-balance">£111,074.81</div>
+                </div>
+                
+                <div class="wallet-info">
+                    <div class="info-row">
+                        <span class="info-label">Wallet Address:</span>
+                        <span class="info-value">3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Certificate Number:</span>
+                        <span class="info-value">982728hayuw</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Wallet Balance:</span>
+                        <span class="info-value">2.4512 BTC</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Equivalent Value:</span>
+                        <span class="info-value">$98,724.52 USD</span>
+                    </div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-label">24h Change</div>
+                        <div class="stat-value" id="24h-change">+3.42%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Market Cap</div>
+                        <div class="stat-value" id="market-cap">$728B</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">24h Volume</div>
+                        <div class="stat-value" id="24h-volume">$28B</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Dominance</div>
+                        <div class="stat-value" id="dominance">42.8%</div>
+                    </div>
+                </div>
+                
+                <div id="chart-container">
+                    <canvas id="btc-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Menu Toggle Functionality
+        const menuBtn = document.getElementById('menu-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        
+        menuBtn.addEventListener('click', function() {
+            this.classList.toggle('active');
+            settingsPanel.classList.toggle('active');
+        });
+        
+        // Settings Items Click Handlers
+        const settingsItems = document.querySelectorAll('.settings-item');
+        settingsItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Hide all access denied messages first
+                document.querySelectorAll('.access-denied').forEach(msg => {
+                    msg.style.display = 'none';
+                });
+                
+                // Show the clicked item's access denied message
+                const deniedMsg = this.querySelector('.access-denied');
+                if (deniedMsg) {
+                    deniedMsg.style.display = 'block';
+                }
+            });
+        });
+        
+        // Login functionality
+        document.getElementById('login-btn').addEventListener('click', function() {
+            const certificate = document.getElementById('certificate').value;
+            const withdrawalHash = document.getElementById('withdrawalHash').value;
+            
+            if (certificate === '982728hayuw' && withdrawalHash === 'wirny6829oan') {
+                // Successful login
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('dashboard-container').style.display = 'flex';
+                initDashboard();
+            } else {
+                // Failed login
+                document.getElementById('login-error').style.display = 'block';
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            document.getElementById('dashboard-container').style.display = 'none';
+            document.getElementById('login-container').style.display = 'flex';
+            document.getElementById('certificate').value = '';
+            document.getElementById('withdrawalHash').value = '';
+            document.getElementById('login-error').style.display = 'none';
+            
+            // Close settings panel if open
+            menuBtn.classList.remove('active');
+            settingsPanel.cla
